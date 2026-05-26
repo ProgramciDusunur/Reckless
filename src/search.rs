@@ -689,7 +689,11 @@ fn search<NODE: NodeType>(
     }
     // Low Depth Singular Extensions (LDSE)
     else if depth <= 7 && !in_check && cut_node && estimated_score <= alpha - 25 {
-        extension = 1;
+        let mut ldse_margin = alpha - 25;
+        ldse_margin += 768 * correction_value.abs() / 98304;
+        if estimated_score <= ldse_margin {
+            extension = 1;
+        }
     }
 
     let mut best_move = Move::NULL;
