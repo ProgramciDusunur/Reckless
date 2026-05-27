@@ -865,6 +865,7 @@ fn search<NODE: NodeType>(
                 if !NODE::ROOT {
                     new_depth += (score > best_score + 54) as i32;
                     new_depth -= (score < best_score + 8) as i32;
+                    new_depth -= if is_quiet { (history * 32 / 65536) as i32 } else { 0 };
                 }
 
                 if new_depth > reduced_depth {
