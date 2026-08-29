@@ -328,7 +328,7 @@ fn search<NODE: NodeType>(
         if !in_check {
             let raw_eval = td.nnue.evaluate(&td.board);
             let cuckoo_static_eval = correct_eval(td, raw_eval, eval_correction(td, ply));
-            let corrhist_bonus = (0 - cuckoo_static_eval).clamp(-4678, 2496);
+            let corrhist_bonus = 0 - cuckoo_static_eval;
             update_correction_histories(td, depth, corrhist_bonus, ply);
         }
         if alpha >= beta {
@@ -1225,7 +1225,7 @@ fn qsearch<NODE: NodeType>(td: &mut ThreadData, mut alpha: i32, beta: i32, ply: 
         if !in_check {
             let raw_eval = td.nnue.evaluate(&td.board);
             let cuckoo_static_eval = correct_eval(td, raw_eval, eval_correction(td, ply));
-            let corrhist_bonus = (0 - cuckoo_static_eval).clamp(-4678, 2496);
+            let corrhist_bonus = 0 - cuckoo_static_eval;
             update_correction_histories(td, 1, corrhist_bonus, ply);
         }
         if alpha >= beta {
