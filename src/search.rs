@@ -325,6 +325,12 @@ fn search<NODE: NodeType>(
     let draw_score = draw(td);
     if !NODE::ROOT && alpha < draw_score && td.board.upcoming_repetition(ply as usize) {
         alpha = draw_score;
+        if !in_check {
+            let raw_eval = td.nnue.evaluate(&td.board);
+            let cuckoo_static_eval = correct_eval(td, raw_eval, eval_correction(td, ply));
+            let corrhist_bonus = (0 - cuckoo_static_eval).clamp(-4678, 2496);
+            update_correction_histories(td, depth, corrhist_bonus, ply);
+        }
         if alpha >= beta {
             return alpha;
         }
@@ -1211,16 +1217,23 @@ fn qsearch<NODE: NodeType>(td: &mut ThreadData, mut alpha: i32, beta: i32, ply: 
     debug_assert!(-Score::INFINITE <= alpha && alpha < beta && beta <= Score::INFINITE);
     debug_assert!(NODE::PV || alpha == beta - 1);
 
+    let in_check = td.board.in_check();
     let draw_score = draw(td);
+
     if alpha < draw_score && td.board.upcoming_repetition(ply as usize) {
         alpha = draw_score;
+        if !in_check {
+            let raw_eval = td.nnue.evaluate(&td.board);
+            let cuckoo_static_eval = correct_eval(td, raw_eval, eval_correction(td, ply));
+            let corrhist_bonus = (0 - cuckoo_static_eval).clamp(-4678, 2496);
+            update_correction_histories(td, 1, corrhist_bonus, ply);
+        }
         if alpha >= beta {
             return alpha;
         }
     }
 
-    let stm = td.board.side_to_move();
-    let in_check = td.board.in_check();
+    let stm = td.board.side_to_move();    
 
     if NODE::PV {
         td.pv_table.clear(ply as usize);
